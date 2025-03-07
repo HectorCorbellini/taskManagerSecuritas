@@ -17,16 +17,18 @@ import com.securitas.model.Assignment;
 import com.securitas.model.Location;
 import com.securitas.model.Shift;
 import com.securitas.service.TaskManagerService;
+import com.securitas.InputHandler;
+import com.securitas.TaskService;
 
 /**
  * Main application for managing assignments, locations, and shifts for security guards.
  */
 public class TaskManagerApp {
     private static final Logger logger = LoggerFactory.getLogger(TaskManagerApp.class);
-    private static final TaskManagerService service = new TaskManagerService();
+    private static final InputHandler inputHandler = new InputHandler();
+    private static final TaskService taskService = new TaskService();
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-    private static final Scanner scanner = new Scanner(System.in);
 
     /**
      * Main entry point of the application.
@@ -36,8 +38,8 @@ public class TaskManagerApp {
     public static void main(String[] args) {
         try {
             // Generate rest schedules for the next year
-            LocalDate today = getDynamicDate();
-            service.generateRestSchedules(today, 52);
+            LocalDate today = taskService.getDynamicDate();
+            taskService.generateRestSchedules(today, 52);
             logger.info("Rest schedules generated for the next year.");
         } catch (SQLException e) {
             logger.error("Error generating rest schedules: " + e.getMessage());
@@ -47,7 +49,7 @@ public class TaskManagerApp {
 
         if (args.length > 0) {
             try {
-                processCommand(args);
+                taskService.processCommand(args);
             } catch (Exception e) {
                 logger.error("Error: " + e.getMessage());
                 System.exit(1);
@@ -56,24 +58,42 @@ public class TaskManagerApp {
         }
         while (true) {
             try {
-                showMenu();
-                int choice = Integer.parseInt(scanner.nextLine());
+                inputHandler.showMenu();
+                String choice = inputHandler.getUserInput();
 
                 switch (choice) {
-                    case 1 -> addLocation();
-                    case 2 -> addShift();
-                    case 3 -> addAssignment();
-                    case 4 -> displayTomorrowAssignment();
-                    case 5 -> viewAssignmentsByDateRange();
-                    case 6 -> updateAssignment();
-                    case 7 -> viewAllLocations();
-                    case 8 -> viewRecurringShifts();
-                    case 9 -> checkIfRestDay();
-                    case 0 -> {
+                    case "1":
+                        addLocation();
+                        break;
+                    case "2":
+                        addShift();
+                        break;
+                    case "3":
+                        addAssignment();
+                        break;
+                    case "4":
+                        displayTomorrowAssignment();
+                        break;
+                    case "5":
+                        viewAssignmentsByDateRange();
+                        break;
+                    case "6":
+                        updateAssignment();
+                        break;
+                    case "7":
+                        viewAllLocations();
+                        break;
+                    case "8":
+                        viewRecurringShifts();
+                        break;
+                    case "9":
+                        checkIfRestDay();
+                        break;
+                    case "0":
                         logger.info("Goodbye!");
                         return;
-                    }
-                    default -> logger.info("Invalid choice. Please try again.");
+                    default:
+                        logger.info("Invalid choice. Please try again.");
                 }
             } catch (Exception e) {
                 logger.info("An error occurred: " + e.getMessage());
@@ -85,33 +105,19 @@ public class TaskManagerApp {
      * Displays the main menu of the application.
      */
     private static void showMenu() {
-        logger.info("\n===== Task Manager Menu =====");
-        logger.info("1. Add New Location");
-        logger.info("2. Add New Shift");
-        logger.info("3. Add New Assignment");
-        logger.info("4. View Tomorrow's Assignment");
-        logger.info("5. View Assignments by Date Range");
-        logger.info("6. Update Assignment");
-        logger.info("7. View All Locations");
-        logger.info("8. View Recurring Shifts");
-        logger.info("9. Check if Date is Rest Day");
-        logger.info("0. Exit");
-        System.out.print("Enter your choice: ");
+        inputHandler.showMenu();
     }
 
     /**
      * Adds a new location based on user input.
      */
     private static void addLocation() {
-        System.out.print("Enter location name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter location type: ");
-        String type = scanner.nextLine();
-        System.out.print("Enter address: ");
-        String address = scanner.nextLine();
+        String name = inputHandler.getUserInput("Enter location name: ");
+        String type = inputHandler.getUserInput("Enter location type: ");
+        String address = inputHandler.getUserInput("Enter address: ");
 
         try {
-            Location newLocation = service.addLocation(name, type, address);
+            Location newLocation = taskService.addLocation(name, type, address);
             logger.info("Location added successfully with ID: " + newLocation.getId());
         } catch (SQLException e) {
             logger.error("SQL Error: " + e.getMessage());
@@ -124,24 +130,18 @@ public class TaskManagerApp {
      * Adds a new shift based on user input.
      */
     private static void addShift() {
-        System.out.print("Enter location ID: ");
-        Long locationId = Long.parseLong(scanner.nextLine());
-        System.out.print("Enter start time (HH:mm): ");
-        LocalTime startTime = LocalTime.parse(scanner.nextLine(), timeFormatter);
-        System.out.print("Enter end time (HH:mm): ");
-        LocalTime endTime = LocalTime.parse(scanner.nextLine(), timeFormatter);
-        System.out.print("Is armed guard required? (true/false): ");
-        boolean isArmed = Boolean.parseBoolean(scanner.nextLine());
-        System.out.print("Is this a recurring shift? (true/false): ");
-        boolean isRecurring = Boolean.parseBoolean(scanner.nextLine());
+        Long locationId = Long.parseLong(inputHandler.getUserInput("Enter location ID: "));
+        LocalTime startTime = LocalTime.parse(inputHandler.getUserInput("Enter start time (HH:mm): "), timeFormatter);
+        LocalTime endTime = LocalTime.parse(inputHandler.getUserInput("Enter end time (HH:mm): "), timeFormatter);
+        boolean isArmed = Boolean.parseBoolean(inputHandler.getUserInput("Is armed guard required? (true/false): "));
+        boolean isRecurring = Boolean.parseBoolean(inputHandler.getUserInput("Is this a recurring shift? (true/false): "));
         String recurrencePattern = "";
         if (isRecurring) {
-            System.out.print("Enter recurrence pattern (e.g., WEEKLY_MONDAY): ");
-            recurrencePattern = scanner.nextLine();
+            recurrencePattern = inputHandler.getUserInput("Enter recurrence pattern (e.g., WEEKLY_MONDAY): ");
         }
 
         try {
-            Shift newShift = service.addShift(locationId, startTime, endTime, isArmed, isRecurring, recurrencePattern);
+            Shift newShift = taskService.addShift(locationId, startTime, endTime, isArmed, isRecurring, recurrencePattern);
             logger.info("Shift added successfully with ID: " + newShift.getId());
         } catch (SQLException e) {
             logger.error("SQL Error: " + e.getMessage());
@@ -154,17 +154,13 @@ public class TaskManagerApp {
      * Adds a new assignment based on user input.
      */
     private static void addAssignment() {
-        System.out.print("Enter shift ID: ");
-        Long shiftId = Long.parseLong(scanner.nextLine());
-        System.out.print("Enter assignment date (yyyy-MM-dd): ");
-        LocalDate assignmentDate = LocalDate.parse(scanner.nextLine(), dateFormatter);
-        System.out.print("Is this a retén assignment? (true/false): ");
-        boolean isReten = Boolean.parseBoolean(scanner.nextLine());
-        System.out.print("Enter any notes: ");
-        String notes = scanner.nextLine();
+        Long shiftId = Long.parseLong(inputHandler.getUserInput("Enter shift ID: "));
+        LocalDate assignmentDate = LocalDate.parse(inputHandler.getUserInput("Enter assignment date (yyyy-MM-dd): "), dateFormatter);
+        boolean isReten = Boolean.parseBoolean(inputHandler.getUserInput("Is this a retén assignment? (true/false): "));
+        String notes = inputHandler.getUserInput("Enter any notes: ");
 
         try {
-            Assignment newAssignment = service.addAssignment(shiftId, assignmentDate, isReten, notes);
+            Assignment newAssignment = taskService.addAssignment(shiftId, assignmentDate, isReten, notes);
             logger.info("Assignment added successfully with ID: " + newAssignment.getId());
         } catch (SQLException e) {
             logger.error("SQL Error: " + e.getMessage());
@@ -179,13 +175,13 @@ public class TaskManagerApp {
     private static void displayTomorrowAssignment() {
         LocalDate tomorrow;
         try {
-            tomorrow = getDynamicDate().plusDays(1);
+            tomorrow = taskService.getDynamicDate().plusDays(1);
         } catch (Exception e) {
             logger.error("Error getting dynamic date: " + e.getMessage());
             return;
         }
         try {
-            Assignment tomorrowAssignment = service.getAssignmentForDate(tomorrow);
+            Assignment tomorrowAssignment = taskService.getAssignmentForDate(tomorrow);
             if (tomorrowAssignment != null) {
                 printAssignmentDetails(tomorrowAssignment);
             } else {
@@ -217,19 +213,7 @@ public class TaskManagerApp {
      * @return the current date as a LocalDate object.
      */
     private static LocalDate getDynamicDate() throws Exception {
-        URL url = new URL("http://worldtimeapi.org/api/timezone/Etc/UTC");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-        String jsonResponse = response.toString();
-        String currentDate = jsonResponse.split("\\\"")[1].split(",")[0].split(":")[1].replaceAll("\\\"", "").trim();
-        return LocalDate.parse(currentDate);
+        return taskService.getDynamicDate();
     }
 
     /**
@@ -237,13 +221,11 @@ public class TaskManagerApp {
      */
     private static void viewAssignmentsByDateRange() {
         try {
-            System.out.print("Enter start date (yyyy-MM-dd): ");
-            LocalDate startDate = LocalDate.parse(scanner.nextLine(), dateFormatter);
+            LocalDate startDate = LocalDate.parse(inputHandler.getUserInput("Enter start date (yyyy-MM-dd): "), dateFormatter);
 
-            System.out.print("Enter end date (yyyy-MM-dd): ");
-            LocalDate endDate = LocalDate.parse(scanner.nextLine(), dateFormatter);
+            LocalDate endDate = LocalDate.parse(inputHandler.getUserInput("Enter end date (yyyy-MM-dd): "), dateFormatter);
 
-            List<Assignment> assignments = service.getAssignmentsForDateRange(startDate, endDate);
+            List<Assignment> assignments = taskService.getAssignmentsForDateRange(startDate, endDate);
 
             if (!assignments.isEmpty()) {
                 logger.info("\nAssignments from " + startDate + " to " + endDate + ":");
@@ -268,19 +250,15 @@ public class TaskManagerApp {
      */
     private static void updateAssignment() {
         try {
-            System.out.print("Enter assignment ID: ");
-            Long assignmentId = Long.parseLong(scanner.nextLine());
+            Long assignmentId = Long.parseLong(inputHandler.getUserInput("Enter assignment ID: "));
 
-            System.out.print("Is this a retén assignment? (true/false): ");
-            boolean isReten = Boolean.parseBoolean(scanner.nextLine());
+            boolean isReten = Boolean.parseBoolean(inputHandler.getUserInput("Is this a retén assignment? (true/false): "));
 
-            System.out.print("Enter status (SCHEDULED/COMPLETED/CANCELLED): ");
-            String status = scanner.nextLine();
+            String status = inputHandler.getUserInput("Enter status (SCHEDULED/COMPLETED/CANCELLED): ");
 
-            System.out.print("Enter notes: ");
-            String notes = scanner.nextLine();
+            String notes = inputHandler.getUserInput("Enter notes: ");
 
-            service.updateAssignmentDetails(assignmentId, isReten, status, notes);
+            taskService.updateAssignmentDetails(assignmentId, isReten, status, notes);
             logger.info("Assignment updated successfully.");
         } catch (SQLException e) {
             logger.error("SQL Error: " + e.getMessage());
@@ -294,7 +272,7 @@ public class TaskManagerApp {
      */
     private static void viewAllLocations() {
         try {
-            List<Location> locations = service.getAllLocations();
+            List<Location> locations = taskService.getAllLocations();
 
             if (!locations.isEmpty()) {
                 logger.info("\nAll Locations:");
@@ -319,7 +297,7 @@ public class TaskManagerApp {
      */
     private static void viewRecurringShifts() {
         try {
-            List<Shift> shifts = service.getRecurringShifts();
+            List<Shift> shifts = taskService.getRecurringShifts();
 
             if (!shifts.isEmpty()) {
                 logger.info("\nRecurring Shifts:");
@@ -346,10 +324,9 @@ public class TaskManagerApp {
      */
     private static void checkIfRestDay() {
         try {
-            System.out.print("Enter date (yyyy-MM-dd): ");
-            LocalDate date = LocalDate.parse(scanner.nextLine(), dateFormatter);
+            LocalDate date = LocalDate.parse(inputHandler.getUserInput("Enter date (yyyy-MM-dd): "), dateFormatter);
 
-            boolean isRestDay = service.isRestDay(date);
+            boolean isRestDay = taskService.isRestDay(date);
             if (isRestDay) {
                 logger.info(date + " is a rest day.");
             } else {
@@ -368,73 +345,6 @@ public class TaskManagerApp {
      * @param args command-line arguments.
      */
     private static void processCommand(String[] args) throws SQLException {
-        String command = args[0];
-
-        switch (command) {
-            case "add-location" -> {
-                if (args.length != 4) {
-                    throw new IllegalArgumentException("Usage: add-location <name> <type> <address>");
-                }
-                Location location = service.addLocation(args[1], args[2], args[3]);
-                logger.info("Location added successfully with ID: " + location.getId());
-            }
-            case "add-shift" -> {
-                if (args.length != 7) {
-                    throw new IllegalArgumentException("Usage: add-shift <locationId> <startTime> <endTime> <isArmed> <isRecurring> <recurrencePattern>");
-                }
-                Long locationId = Long.parseLong(args[1]);
-                LocalTime startTime = LocalTime.parse(args[2], timeFormatter);
-                LocalTime endTime = LocalTime.parse(args[3], timeFormatter);
-                boolean isArmed = Boolean.parseBoolean(args[4]);
-                boolean isRecurring = Boolean.parseBoolean(args[5]);
-                Shift shift = service.addShift(locationId, startTime, endTime, isArmed, isRecurring, args[6]);
-                logger.info("Shift added successfully with ID: " + shift.getId());
-            }
-            case "add-assignment" -> {
-                if (args.length != 5) {
-                    throw new IllegalArgumentException("Usage: add-assignment <shiftId> <date> <isReten> <notes>");
-                }
-                Long shiftId = Long.parseLong(args[1]);
-                LocalDate date = LocalDate.parse(args[2], dateFormatter);
-                boolean isReten = Boolean.parseBoolean(args[3]);
-                try {
-                    Assignment assignment = service.addAssignment(shiftId, date, isReten, args[4]);
-                    logger.info("Assignment added successfully with ID: " + assignment.getId());
-                } catch (SQLException e) {
-                    logger.error("SQL Error: " + e.getMessage());
-                } catch (Exception e) {
-                    logger.error("Error adding assignment: " + e.getMessage());
-                }
-            }
-            case "view-tomorrow" -> {
-                try {
-                    Assignment assignment = service.getAssignmentForDate(getDynamicDate().plusDays(1));
-                    if (assignment != null) {
-                        printAssignmentDetails(assignment);
-                    } else {
-                        logger.info("No assignment found for tomorrow.");
-                    }
-                } catch (SQLException e) {
-                    logger.error("SQL Error: " + e.getMessage());
-                } catch (Exception e) {
-                    logger.error("Error getting assignment for date: " + e.getMessage());
-                }
-            }
-            case "view-locations" -> {
-                List<Location> locations = service.getAllLocations();
-                if (!locations.isEmpty()) {
-                    logger.info("All Locations:");
-                    for (Location location : locations) {
-                        logger.info("\nID: " + location.getId());
-                        logger.info("Name: " + location.getName());
-                        logger.info("Type: " + location.getType());
-                        logger.info("Address: " + location.getAddress());
-                    }
-                } else {
-                    logger.info("No locations found.");
-                }
-            }
-            default -> throw new IllegalArgumentException("Unknown command: " + command);
-        }
+        taskService.processCommand(args);
     }
 }

@@ -8,6 +8,7 @@ This application helps security guards working for Securitas manage their daily 
 - **Future Assignments**: Users can query where they will work the following day and get specific details about each job.
 - **Rest Day Management**: The application tracks rotating rest days and ensures assignments do not conflict with these days.
 - **Default Work Hours**: If no hours are specified, the application defaults to a work schedule from 14:00 to 22:00.
+- **Separation of Concerns**: The application follows a clean architecture with separate classes for user input, business logic, and data access.
 
 ## Logging Framework:
 
@@ -63,9 +64,11 @@ mvn exec:java -Dexec.mainClass="com.securitas.TaskManagerApp"
 - On Tuesday, the user will work at Magnolio (instead of Monday as usual).
 
 ## Recent Updates:
+- **Refactored Architecture**: The application has been refactored to separate concerns with dedicated classes for input handling and business logic.
 - **Error Handling**: The application now includes robust error handling to manage exceptions during assignment retrieval and addition.
-- **Dynamic Date Retrieval**: The application retrieves the current date dynamically from an API, ensuring accurate scheduling.
+- **Dynamic Date Retrieval**: The application retrieves the current date dynamically, ensuring accurate scheduling.
 - **Improved User Interface**: The application now features an enhanced user interface for easier navigation and assignment management.
+- **Database Setup**: Added SQL scripts to automatically set up the required database tables.
 
 ## Application Capabilities:
 
@@ -79,6 +82,7 @@ mvn exec:java -Dexec.mainClass="com.securitas.TaskManagerApp"
 - Java 17 or higher
 - Maven for building the project
 - MySQL for database management
+- SLF4J with Log4j2 for logging
 
 ## Features:
 - Dynamic scheduling of assignments.
@@ -94,7 +98,33 @@ mvn exec:java -Dexec.mainClass="com.securitas.TaskManagerApp"
 ## Installation Instructions:
 1. Clone the repository: `git clone https://github.com/HectorCorbellini/taskManagerSecuritas`
 2. Navigate to the project directory: `cd taskManagerSecuritas`
-3. Build the project using Maven: `mvn clean install`
-4. Run the application: `java com.securitas.TaskManagerApp`
+3. Set up the database:
+   ```bash
+   mysql -u root -pplacita < src/main/resources/db/setup.sql
+   ```
+4. Build the project using Maven: `mvn clean install`
+5. Run the application: `mvn exec:java`
+
+## Project Structure:
+
+```
+src/main/java/com/securitas/
+├── dao/                 # Data Access Objects for database operations
+├── model/               # Domain models (Location, Shift, Assignment, etc.)
+├── service/             # Business logic services
+├── util/                # Utility classes (DatabaseConnection, etc.)
+├── InputHandler.java    # Handles user input and displays menus
+├── TaskManagerApp.java  # Main application entry point
+└── TaskService.java     # Service layer for task-related operations
+```
+
+## Architecture:
+
+The application follows a layered architecture:
+
+1. **Presentation Layer**: TaskManagerApp and InputHandler handle user interaction
+2. **Service Layer**: TaskService and TaskManagerService contain business logic
+3. **Data Access Layer**: DAO classes handle database operations
+4. **Domain Layer**: Model classes represent the business entities
 
 This application is designed to enhance the scheduling experience for security guards, making it easier to manage their dynamic work environment.
