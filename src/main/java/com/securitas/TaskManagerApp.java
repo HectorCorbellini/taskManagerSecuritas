@@ -85,160 +85,221 @@ public class TaskManagerApp {
         System.out.print("Enter your choice: ");
     }
 
-    private static void addNewLocation() throws SQLException {
-        System.out.print("Enter location name: ");
-        String name = scanner.nextLine();
-        
-        System.out.print("Enter location type: ");
-        String type = scanner.nextLine();
-        
-        System.out.print("Enter address: ");
-        String address = scanner.nextLine();
-        
-        Location location = service.addLocation(name, type, address);
-        System.out.println("Location added successfully with ID: " + location.getId());
-    }
-
-    private static void addNewShift() throws SQLException {
-        System.out.print("Enter location ID: ");
-        Long locationId = Long.parseLong(scanner.nextLine());
-        
-        System.out.print("Enter start time (HH:mm): ");
-        LocalTime startTime = LocalTime.parse(scanner.nextLine(), timeFormatter);
-        
-        System.out.print("Enter end time (HH:mm): ");
-        LocalTime endTime = LocalTime.parse(scanner.nextLine(), timeFormatter);
-        
-        System.out.print("Is armed guard required? (true/false): ");
-        boolean isArmed = Boolean.parseBoolean(scanner.nextLine());
-        
-        System.out.print("Is this a recurring shift? (true/false): ");
-        boolean isRecurring = Boolean.parseBoolean(scanner.nextLine());
-        
-        String recurrencePattern = "";
-        if (isRecurring) {
-            System.out.print("Enter recurrence pattern (e.g., WEEKLY_MONDAY): ");
-            recurrencePattern = scanner.nextLine();
-        }
-        
-        Shift shift = service.addShift(locationId, startTime, endTime, isArmed, isRecurring, recurrencePattern);
-        System.out.println("Shift added successfully with ID: " + shift.getId());
-    }
-
-    private static void addNewAssignment() throws SQLException {
-        System.out.print("Enter shift ID: ");
-        Long shiftId = Long.parseLong(scanner.nextLine());
-        
-        System.out.print("Enter assignment date (yyyy-MM-dd): ");
-        LocalDate date = LocalDate.parse(scanner.nextLine(), dateFormatter);
-        
-        System.out.print("Is this a retén assignment? (true/false): ");
-        boolean isReten = Boolean.parseBoolean(scanner.nextLine());
-        
-        System.out.print("Enter any notes: ");
-        String notes = scanner.nextLine();
-        
-        Assignment assignment = service.addAssignment(shiftId, date, isReten, notes);
-        System.out.println("Assignment added successfully with ID: " + assignment.getId());
-    }
-
-    private static void viewTomorrowsAssignment() throws SQLException {
-        LocalDate tomorrow = getDynamicDate().plusDays(1);
-        Assignment assignment = service.getAssignmentForDate(tomorrow);
-        
-        if (assignment != null) {
-            System.out.println("\nTomorrow's Assignment:");
-            System.out.println("Date: " + assignment.getAssignmentDate());
-            System.out.println("Retén: " + (assignment.isReten() ? "Yes" : "No"));
-            System.out.println("Status: " + assignment.getStatus());
-            System.out.println("Notes: " + assignment.getNotes());
-        } else {
-            System.out.println("No assignment found for tomorrow.");
+    private static void addNewLocation() {
+        try {
+            System.out.print("Enter location name: ");
+            String name = scanner.nextLine();
+            
+            System.out.print("Enter location type: ");
+            String type = scanner.nextLine();
+            
+            System.out.print("Enter address: ");
+            String address = scanner.nextLine();
+            
+            Location location = service.addLocation(name, type, address);
+            System.out.println("Location added successfully with ID: " + location.getId());
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error adding location: " + e.getMessage());
         }
     }
 
-    private static void viewAssignmentsByDateRange() throws SQLException {
-        System.out.print("Enter start date (yyyy-MM-dd): ");
-        LocalDate startDate = LocalDate.parse(scanner.nextLine(), dateFormatter);
-        
-        System.out.print("Enter end date (yyyy-MM-dd): ");
-        LocalDate endDate = LocalDate.parse(scanner.nextLine(), dateFormatter);
-        
-        List<Assignment> assignments = service.getAssignmentsForDateRange(startDate, endDate);
-        
-        if (!assignments.isEmpty()) {
-            System.out.println("\nAssignments from " + startDate + " to " + endDate + ":");
-            for (Assignment assignment : assignments) {
-                System.out.println("\nDate: " + assignment.getAssignmentDate());
-                System.out.println("Retén: " + (assignment.isReten() ? "Yes" : "No"));
-                System.out.println("Status: " + assignment.getStatus());
-                System.out.println("Notes: " + assignment.getNotes());
+    private static void addNewShift() {
+        try {
+            System.out.print("Enter location ID: ");
+            Long locationId = Long.parseLong(scanner.nextLine());
+            
+            System.out.print("Enter start time (HH:mm): ");
+            LocalTime startTime = LocalTime.parse(scanner.nextLine(), timeFormatter);
+            
+            System.out.print("Enter end time (HH:mm): ");
+            LocalTime endTime = LocalTime.parse(scanner.nextLine(), timeFormatter);
+            
+            System.out.print("Is armed guard required? (true/false): ");
+            boolean isArmed = Boolean.parseBoolean(scanner.nextLine());
+            
+            System.out.print("Is this a recurring shift? (true/false): ");
+            boolean isRecurring = Boolean.parseBoolean(scanner.nextLine());
+            
+            String recurrencePattern = "";
+            if (isRecurring) {
+                System.out.print("Enter recurrence pattern (e.g., WEEKLY_MONDAY): ");
+                recurrencePattern = scanner.nextLine();
             }
-        } else {
-            System.out.println("No assignments found for the specified date range.");
+            
+            Shift shift = service.addShift(locationId, startTime, endTime, isArmed, isRecurring, recurrencePattern);
+            System.out.println("Shift added successfully with ID: " + shift.getId());
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error adding shift: " + e.getMessage());
         }
     }
 
-    private static void updateAssignment() throws SQLException {
-        System.out.print("Enter assignment ID: ");
-        Long assignmentId = Long.parseLong(scanner.nextLine());
-        
-        System.out.print("Is this a retén assignment? (true/false): ");
-        boolean isReten = Boolean.parseBoolean(scanner.nextLine());
-        
-        System.out.print("Enter status (SCHEDULED/COMPLETED/CANCELLED): ");
-        String status = scanner.nextLine();
-        
-        System.out.print("Enter notes: ");
-        String notes = scanner.nextLine();
-        
-        service.updateAssignmentDetails(assignmentId, isReten, status, notes);
-        System.out.println("Assignment updated successfully.");
-    }
-
-    private static void viewAllLocations() throws SQLException {
-        List<Location> locations = service.getAllLocations();
-        
-        if (!locations.isEmpty()) {
-            System.out.println("\nAll Locations:");
-            for (Location location : locations) {
-                System.out.println("\nID: " + location.getId());
-                System.out.println("Name: " + location.getName());
-                System.out.println("Type: " + location.getType());
-                System.out.println("Address: " + location.getAddress());
+    private static void addNewAssignment() {
+        try {
+            System.out.print("Enter shift ID: ");
+            Long shiftId = Long.parseLong(scanner.nextLine());
+            
+            System.out.print("Enter assignment date (yyyy-MM-dd): ");
+            LocalDate date = LocalDate.parse(scanner.nextLine(), dateFormatter);
+            
+            System.out.print("Is this a retén assignment? (true/false): ");
+            boolean isReten = Boolean.parseBoolean(scanner.nextLine());
+            
+            System.out.print("Enter any notes: ");
+            String notes = scanner.nextLine();
+            
+            try {
+                Assignment assignment = service.addAssignment(shiftId, date, isReten, notes);
+                System.out.println("Assignment added successfully with ID: " + assignment.getId());
+            } catch (SQLException e) {
+                System.err.println("SQL Error: " + e.getMessage());
+            } catch (Exception e) {
+                System.err.println("Error adding assignment: " + e.getMessage());
             }
-        } else {
-            System.out.println("No locations found.");
+        } catch (Exception e) {
+            System.err.println("Error adding assignment: " + e.getMessage());
         }
     }
 
-    private static void viewRecurringShifts() throws SQLException {
-        List<Shift> shifts = service.getRecurringShifts();
-        
-        if (!shifts.isEmpty()) {
-            System.out.println("\nRecurring Shifts:");
-            for (Shift shift : shifts) {
-                System.out.println("\nID: " + shift.getId());
-                System.out.println("Location ID: " + shift.getLocationId());
-                System.out.println("Start Time: " + shift.getStartTime());
-                System.out.println("End Time: " + shift.getEndTime());
-                System.out.println("Armed: " + (shift.isArmed() ? "Yes" : "No"));
-                System.out.println("Recurrence Pattern: " + shift.getRecurrencePattern());
+    private static void viewTomorrowsAssignment() {
+        try {
+            LocalDate tomorrow = getDynamicDate().plusDays(1);
+            try {
+                Assignment assignment = service.getAssignmentForDate(tomorrow);
+                if (assignment != null) {
+                    System.out.println("\nTomorrow's Assignment:");
+                    System.out.println("Date: " + assignment.getAssignmentDate());
+                    System.out.println("Retén: " + (assignment.isReten() ? "Yes" : "No"));
+                    System.out.println("Status: " + assignment.getStatus());
+                    System.out.println("Notes: " + assignment.getNotes());
+                } else {
+                    System.out.println("No assignment found for tomorrow.");
+                }
+            } catch (SQLException e) {
+                System.err.println("SQL Error: " + e.getMessage());
+            } catch (Exception e) {
+                System.err.println("Error getting assignment for date: " + e.getMessage());
             }
-        } else {
-            System.out.println("No recurring shifts found.");
+        } catch (Exception e) {
+            System.out.println("An error occurred: " + e.getMessage());
         }
     }
 
-    private static void checkIfRestDay() throws SQLException {
-        System.out.print("Enter date (yyyy-MM-dd): ");
-        LocalDate date = LocalDate.parse(scanner.nextLine(), dateFormatter);
-        
-        boolean isRestDay = service.isRestDay(date);
-        if (isRestDay) {
-            System.out.println(date + " is a rest day.");
-        } else {
-            System.out.println(date + " is a work day.");
+    private static void viewAssignmentsByDateRange() {
+        try {
+            System.out.print("Enter start date (yyyy-MM-dd): ");
+            LocalDate startDate = LocalDate.parse(scanner.nextLine(), dateFormatter);
+            
+            System.out.print("Enter end date (yyyy-MM-dd): ");
+            LocalDate endDate = LocalDate.parse(scanner.nextLine(), dateFormatter);
+            
+            List<Assignment> assignments = service.getAssignmentsForDateRange(startDate, endDate);
+            
+            if (!assignments.isEmpty()) {
+                System.out.println("\nAssignments from " + startDate + " to " + endDate + ":");
+                for (Assignment assignment : assignments) {
+                    System.out.println("\nDate: " + assignment.getAssignmentDate());
+                    System.out.println("Retén: " + (assignment.isReten() ? "Yes" : "No"));
+                    System.out.println("Status: " + assignment.getStatus());
+                    System.out.println("Notes: " + assignment.getNotes());
+                }
+            } else {
+                System.out.println("No assignments found for the specified date range.");
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error getting assignments for date range: " + e.getMessage());
+        }
+    }
+
+    private static void updateAssignment() {
+        try {
+            System.out.print("Enter assignment ID: ");
+            Long assignmentId = Long.parseLong(scanner.nextLine());
+            
+            System.out.print("Is this a retén assignment? (true/false): ");
+            boolean isReten = Boolean.parseBoolean(scanner.nextLine());
+            
+            System.out.print("Enter status (SCHEDULED/COMPLETED/CANCELLED): ");
+            String status = scanner.nextLine();
+            
+            System.out.print("Enter notes: ");
+            String notes = scanner.nextLine();
+            
+            service.updateAssignmentDetails(assignmentId, isReten, status, notes);
+            System.out.println("Assignment updated successfully.");
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error updating assignment: " + e.getMessage());
+        }
+    }
+
+    private static void viewAllLocations() {
+        try {
+            List<Location> locations = service.getAllLocations();
+            
+            if (!locations.isEmpty()) {
+                System.out.println("\nAll Locations:");
+                for (Location location : locations) {
+                    System.out.println("\nID: " + location.getId());
+                    System.out.println("Name: " + location.getName());
+                    System.out.println("Type: " + location.getType());
+                    System.out.println("Address: " + location.getAddress());
+                }
+            } else {
+                System.out.println("No locations found.");
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error getting all locations: " + e.getMessage());
+        }
+    }
+
+    private static void viewRecurringShifts() {
+        try {
+            List<Shift> shifts = service.getRecurringShifts();
+            
+            if (!shifts.isEmpty()) {
+                System.out.println("\nRecurring Shifts:");
+                for (Shift shift : shifts) {
+                    System.out.println("\nID: " + shift.getId());
+                    System.out.println("Location ID: " + shift.getLocationId());
+                    System.out.println("Start Time: " + shift.getStartTime());
+                    System.out.println("End Time: " + shift.getEndTime());
+                    System.out.println("Armed: " + (shift.isArmed() ? "Yes" : "No"));
+                    System.out.println("Recurrence Pattern: " + shift.getRecurrencePattern());
+                }
+            } else {
+                System.out.println("No recurring shifts found.");
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error getting recurring shifts: " + e.getMessage());
+        }
+    }
+
+    private static void checkIfRestDay() {
+        try {
+            System.out.print("Enter date (yyyy-MM-dd): ");
+            LocalDate date = LocalDate.parse(scanner.nextLine(), dateFormatter);
+            
+            boolean isRestDay = service.isRestDay(date);
+            if (isRestDay) {
+                System.out.println(date + " is a rest day.");
+            } else {
+                System.out.println(date + " is a work day.");
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error checking if date is rest day: " + e.getMessage());
         }
     }
 
@@ -272,19 +333,31 @@ public class TaskManagerApp {
                 Long shiftId = Long.parseLong(args[1]);
                 LocalDate date = LocalDate.parse(args[2], dateFormatter);
                 boolean isReten = Boolean.parseBoolean(args[3]);
-                Assignment assignment = service.addAssignment(shiftId, date, isReten, args[4]);
-                System.out.println("Assignment added successfully with ID: " + assignment.getId());
+                try {
+                    Assignment assignment = service.addAssignment(shiftId, date, isReten, args[4]);
+                    System.out.println("Assignment added successfully with ID: " + assignment.getId());
+                } catch (SQLException e) {
+                    System.err.println("SQL Error: " + e.getMessage());
+                } catch (Exception e) {
+                    System.err.println("Error adding assignment: " + e.getMessage());
+                }
             }
             case "view-tomorrow" -> {
-                Assignment assignment = service.getAssignmentForDate(getDynamicDate().plusDays(1));
-                if (assignment != null) {
-                    System.out.println("Tomorrow's Assignment:");
-                    System.out.println("Date: " + assignment.getAssignmentDate());
-                    System.out.println("Retén: " + (assignment.isReten() ? "Yes" : "No"));
-                    System.out.println("Status: " + assignment.getStatus());
-                    System.out.println("Notes: " + assignment.getNotes());
-                } else {
-                    System.out.println("No assignment found for tomorrow.");
+                try {
+                    Assignment assignment = service.getAssignmentForDate(getDynamicDate().plusDays(1));
+                    if (assignment != null) {
+                        System.out.println("Tomorrow's Assignment:");
+                        System.out.println("Date: " + assignment.getAssignmentDate());
+                        System.out.println("Retén: " + (assignment.isReten() ? "Yes" : "No"));
+                        System.out.println("Status: " + assignment.getStatus());
+                        System.out.println("Notes: " + assignment.getNotes());
+                    } else {
+                        System.out.println("No assignment found for tomorrow.");
+                    }
+                } catch (SQLException e) {
+                    System.err.println("SQL Error: " + e.getMessage());
+                } catch (Exception e) {
+                    System.err.println("Error getting assignment for date: " + e.getMessage());
                 }
             }
             case "view-locations" -> {
