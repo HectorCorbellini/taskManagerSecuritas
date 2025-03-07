@@ -1,0 +1,11 @@
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/dao/RestScheduleDAO.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/dao/LocationDAO.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/model/Assignment.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/dao/ShiftDAO.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/service/TaskManagerService.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/util/DatabaseConnection.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/dao/AssignmentDAO.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/model/RestSchedule.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/model/Shift.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/TaskManagerApp.java
+/home/uko/CascadeProjects/TASK_MANAGER_SECURITAS/src/main/java/com/securitas/model/Location.java
