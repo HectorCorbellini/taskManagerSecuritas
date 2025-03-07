@@ -29,6 +29,11 @@ This application helps security guards working for Securitas manage their daily 
 - Users will not work at Club de Golf on Wednesday this week because it's a free day, and retén service will be moved to Friday.
 - On Tuesday, the user will work at Magnolio (instead of Monday as usual).
 
+## Recent Updates:
+- **Error Handling**: The application now includes robust error handling to manage exceptions during assignment retrieval and addition.
+- **Dynamic Date Retrieval**: The application retrieves the current date dynamically from an API, ensuring accurate scheduling.
+- **Improved User Interface**: The application now features an enhanced user interface for easier navigation and assignment management.
+
 ## Application Capabilities:
 
 - Recognizes recurring shifts (e.g., weekends at Gasoducto Cruz Del Sur, Mondays at Magnolio).
@@ -36,5 +41,27 @@ This application helps security guards working for Securitas manage their daily 
 - Keeps track of rest days (e.g., every Thursday and rotating Wednesdays).
 - Provides answers when queried about future schedules, such as "Where am I working tomorrow?" or "What are my next assignments?"
 - Users can insert new information, such as past assignments on retén days, including details about armed and unarmed shifts.
+
+## Dependencies:
+- Java 17 or higher
+- Maven for building the project
+- MySQL for database management
+
+## Features:
+- Dynamic scheduling of assignments.
+- Error handling for assignment retrieval and addition.
+- Dynamic date retrieval from an API.
+- Enhanced user interface for easy navigation.
+
+## Usage Examples:
+1. **Add an Assignment**: Run the application and select the option to add a new assignment. Follow the prompts to enter the shift ID, date, and notes.
+2. **View Tomorrow's Assignment**: Select the option to view tomorrow's assignment to see details about the next scheduled task.
+3. **Manage Locations and Shifts**: Use the application to add and manage locations and shifts as needed.
+
+## Installation Instructions:
+1. Clone the repository: `git clone https://github.com/HectorCorbellini/taskManagerSecuritas`
+2. Navigate to the project directory: `cd taskManagerSecuritas`
+3. Build the project using Maven: `mvn clean install`
+4. Run the application: `java com.securitas.TaskManagerApp`
 
 This application is designed to enhance the scheduling experience for security guards, making it easier to manage their dynamic work environment.
