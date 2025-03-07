@@ -9,6 +9,39 @@ This application helps security guards working for Securitas manage their daily 
 - **Rest Day Management**: The application tracks rotating rest days and ensures assignments do not conflict with these days.
 - **Default Work Hours**: If no hours are specified, the application defaults to a work schedule from 14:00 to 22:00.
 
+## Logging Framework:
+
+The application uses **SLF4J** with **Log4j2** for logging. Ensure you have the necessary dependencies in your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>2.0.9</version>
+</dependency>
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+    <version>2.0.9</version>
+</dependency>
+```
+
+Logs will be generated in the `logs` directory, with rotation based on size and time.
+
+## Build and Run Instructions:
+
+To build the application, run:
+
+```bash
+mvn clean install
+```
+
+To run the application, use:
+
+```bash
+mvn exec:java -Dexec.mainClass="com.securitas.TaskManagerApp"
+``` 
+
 ## Background Information:
 
 - As a security guard for Securitas, assignments vary daily and often require flexibility.
