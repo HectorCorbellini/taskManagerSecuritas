@@ -119,4 +119,104 @@ public class TaskManagerService {
             throw new IllegalArgumentException("Cannot create assignment on rest day: " + date);
         }
     }
+    
+    /**
+     * Process command-line arguments.
+     * 
+     * @param args command-line arguments
+     * @throws SQLException if a database error occurs
+     */
+    public void processCommand(String[] args) throws SQLException {
+        if (args.length < 1) {
+            System.out.println("No command specified.");
+            return;
+        }
+        
+        String command = args[0];
+        switch (command) {
+            case "add-location":
+                if (args.length < 4) {
+                    System.out.println("Usage: add-location <name> <type> <address>");
+                    return;
+                }
+                Location location = addLocation(args[1], args[2], args[3]);
+                System.out.println("Location added with ID: " + location.getId());
+                break;
+                
+            case "add-shift":
+                if (args.length < 6) {
+                    System.out.println("Usage: add-shift <locationId> <startTime> <endTime> <isArmed> <isRecurring> [recurrencePattern]");
+                    return;
+                }
+                Long locationId = Long.parseLong(args[1]);
+                LocalTime startTime = LocalTime.parse(args[2]);
+                LocalTime endTime = LocalTime.parse(args[3]);
+                boolean isArmed = Boolean.parseBoolean(args[4]);
+                boolean isRecurring = Boolean.parseBoolean(args[5]);
+                String recurrencePattern = args.length > 6 ? args[6] : "";
+                
+                Shift shift = addShift(locationId, startTime, endTime, isArmed, isRecurring, recurrencePattern);
+                System.out.println("Shift added with ID: " + shift.getId());
+                break;
+                
+            case "add-assignment":
+                if (args.length < 4) {
+                    System.out.println("Usage: add-assignment <shiftId> <date> <isReten> [notes]");
+                    return;
+                }
+                Long shiftId = Long.parseLong(args[1]);
+                LocalDate date = LocalDate.parse(args[2]);
+                boolean isReten = Boolean.parseBoolean(args[3]);
+                String notes = args.length > 4 ? args[4] : "";
+                
+                Assignment assignment = addAssignment(shiftId, date, isReten, notes);
+                System.out.println("Assignment added with ID: " + assignment.getId());
+                break;
+                
+            case "view-locations":
+                List<Location> locations = getAllLocations();
+                System.out.println("Locations:");
+                for (Location loc : locations) {
+                    System.out.println("ID: " + loc.getId() + ", Name: " + loc.getName() + ", Type: " + loc.getType() + ", Address: " + loc.getAddress());
+                }
+                break;
+                
+            case "view-shifts":
+                List<Shift> shifts = getRecurringShifts();
+                System.out.println("Shifts:");
+                for (Shift s : shifts) {
+                    System.out.println("ID: " + s.getId() + ", Location ID: " + s.getLocationId() + ", Start: " + s.getStartTime() + ", End: " + s.getEndTime() + ", Armed: " + s.isArmed() + ", Recurring: " + s.isRecurring());
+                }
+                break;
+                
+            case "view-assignments":
+                if (args.length < 3) {
+                    System.out.println("Usage: view-assignments <startDate> <endDate>");
+                    return;
+                }
+                LocalDate startDate = LocalDate.parse(args[1]);
+                LocalDate endDate = LocalDate.parse(args[2]);
+                
+                List<Assignment> assignments = getAssignmentsForDateRange(startDate, endDate);
+                System.out.println("Assignments:");
+                for (Assignment a : assignments) {
+                    System.out.println("ID: " + a.getId() + ", Date: " + a.getAssignmentDate() + ", Shift ID: " + a.getShiftId() + ", Retén: " + a.isReten() + ", Status: " + a.getStatus());
+                }
+                break;
+                
+            case "is-rest-day":
+                if (args.length < 2) {
+                    System.out.println("Usage: is-rest-day <date>");
+                    return;
+                }
+                LocalDate checkDate = LocalDate.parse(args[1]);
+                boolean isRest = isRestDay(checkDate);
+                System.out.println(checkDate + " is " + (isRest ? "a rest day." : "not a rest day."));
+                break;
+                
+            default:
+                System.out.println("Unknown command: " + command);
+                break;
+        }
+    }
 }

@@ -64,16 +64,9 @@ public class TaskService {
     public boolean isRestDay(LocalDate date) throws SQLException {
         return service.isRestDay(date);
     }
-
-    public void addLocation(String name, String type, String address) {
-        try {
-            Location newLocation = service.addLocation(name, type, address);
-            System.out.println("Location added successfully with ID: " + newLocation.getId());
-        } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Error adding location: " + e.getMessage());
-        }
+    
+    public Assignment getAssignmentForDate(LocalDate date) throws SQLException {
+        return service.getAssignmentForDate(date);
     }
 
     // Add similar methods for adding shifts and assignments...

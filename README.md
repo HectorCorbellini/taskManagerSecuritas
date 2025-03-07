@@ -9,6 +9,13 @@ This application helps security guards working for Securitas manage their daily 
 - **Rest Day Management**: The application tracks rotating rest days and ensures assignments do not conflict with these days.
 - **Default Work Hours**: If no hours are specified, the application defaults to a work schedule from 14:00 to 22:00.
 - **Separation of Concerns**: The application follows a clean architecture with separate classes for user input, business logic, and data access.
+- **Command-Line Interface**: Run specific commands directly from the terminal without navigating through menus.
+
+## Documentation
+
+For detailed information about recent architectural improvements and implementation details, please refer to the [Last_Improvements.md](Last_Improvements.md) file.
+
+For detailed information about the latest changes, please refer to [Last_Improvements.md](Last_Improvements.md). Please note that this file is regularly updated to reflect the latest changes and improvements made to the application.
 
 ## Logging Framework:
 
@@ -64,11 +71,11 @@ mvn exec:java -Dexec.mainClass="com.securitas.TaskManagerApp"
 - On Tuesday, the user will work at Magnolio (instead of Monday as usual).
 
 ## Recent Updates:
-- **Refactored Architecture**: The application has been refactored to separate concerns with dedicated classes for input handling and business logic.
-- **Error Handling**: The application now includes robust error handling to manage exceptions during assignment retrieval and addition.
-- **Dynamic Date Retrieval**: The application retrieves the current date dynamically, ensuring accurate scheduling.
-- **Improved User Interface**: The application now features an enhanced user interface for easier navigation and assignment management.
-- **Database Setup**: Added SQL scripts to automatically set up the required database tables.
+- **Command-Line Arguments**: Added support for running specific commands directly from the terminal
+- **Helper Scripts**: Added run_sudo.sh script to simplify running commands with elevated privileges
+- **Documentation**: Added comprehensive documentation of recent architectural improvements
+- **Database Setup**: Added SQL scripts to automatically set up the required database tables
+- **Menu System**: Improved menu system with clearer options and better user feedback
 
 ## Application Capabilities:
 
@@ -98,17 +105,20 @@ mvn exec:java -Dexec.mainClass="com.securitas.TaskManagerApp"
 ## Installation Instructions:
 1. Clone the repository: `git clone https://github.com/HectorCorbellini/taskManagerSecuritas`
 2. Navigate to the project directory: `cd taskManagerSecuritas`
-3. Set up the database:
+3. Make the helper script executable: `chmod +x run_sudo.sh`
+4. Set up the database:
    ```bash
-   mysql -u root -pplacita < src/main/resources/db/setup.sql
+   ./run_sudo.sh mysql -u root -pplacita < src/main/resources/db/setup.sql
    ```
-4. Build the project using Maven: `mvn clean install`
-5. Run the application: `mvn exec:java`
+5. Build the project using Maven: `mvn clean install`
+6. Run the application: `mvn exec:java -Dexec.mainClass="com.securitas.TaskManagerApp"`
+7. Alternatively, run with specific commands: `mvn exec:java -Dexec.mainClass="com.securitas.TaskManagerApp" -Dexec.args="tomorrow"`
 
 ## Project Structure:
 
 ```
 src/main/java/com/securitas/
+├── command/             # Command pattern implementations for user actions
 ├── dao/                 # Data Access Objects for database operations
 ├── model/               # Domain models (Location, Shift, Assignment, etc.)
 ├── service/             # Business logic services
@@ -122,9 +132,22 @@ src/main/java/com/securitas/
 
 The application follows a layered architecture:
 
-1. **Presentation Layer**: TaskManagerApp and InputHandler handle user interaction
+1. **Presentation Layer**: TaskManagerApp, InputHandler, and Command classes handle user interaction
 2. **Service Layer**: TaskService and TaskManagerService contain business logic
 3. **Data Access Layer**: DAO classes handle database operations
 4. **Domain Layer**: Model classes represent the business entities
+
+## Command-Line Usage
+
+The application supports the following command-line arguments:
+
+- `tomorrow` - Display tomorrow's assignment
+- `today` - Display today's assignment
+- `week` - Display assignments for the current week
+- `rest` - Display upcoming rest days
+- `locations` - List all available locations
+- `shifts` - List all recurring shifts
+
+Example: `mvn exec:java -Dexec.mainClass="com.securitas.TaskManagerApp" -Dexec.args="tomorrow"`
 
 This application is designed to enhance the scheduling experience for security guards, making it easier to manage their dynamic work environment.

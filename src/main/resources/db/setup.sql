@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS assignments (
 -- Create rest_schedules table
 CREATE TABLE IF NOT EXISTS rest_schedules (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    week_start_date DATE NOT NULL,
     rest_day1 DATE NOT NULL,
     rest_day2 DATE,
     is_two_day_rest BOOLEAN DEFAULT FALSE
