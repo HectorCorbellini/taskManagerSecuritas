@@ -5,6 +5,9 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.sql.SQLException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.io.BufferedReader;
@@ -19,6 +22,7 @@ import com.securitas.service.TaskManagerService;
  * Main application for managing assignments, locations, and shifts for security guards.
  */
 public class TaskManagerApp {
+    private static final Logger logger = LoggerFactory.getLogger(TaskManagerApp.class);
     private static final TaskManagerService service = new TaskManagerService();
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -34,18 +38,18 @@ public class TaskManagerApp {
             // Generate rest schedules for the next year
             LocalDate today = getDynamicDate();
             service.generateRestSchedules(today, 52);
-            System.out.println("Rest schedules generated for the next year.");
+            logger.info("Rest schedules generated for the next year.");
         } catch (SQLException e) {
-            System.err.println("Error generating rest schedules: " + e.getMessage());
+            logger.error("Error generating rest schedules: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error getting dynamic date: " + e.getMessage());
+            logger.error("Error getting dynamic date: " + e.getMessage());
         }
 
         if (args.length > 0) {
             try {
                 processCommand(args);
             } catch (Exception e) {
-                System.err.println("Error: " + e.getMessage());
+                logger.error("Error: " + e.getMessage());
                 System.exit(1);
             }
             return;
@@ -66,13 +70,13 @@ public class TaskManagerApp {
                     case 8 -> viewRecurringShifts();
                     case 9 -> checkIfRestDay();
                     case 0 -> {
-                        System.out.println("Goodbye!");
+                        logger.info("Goodbye!");
                         return;
                     }
-                    default -> System.out.println("Invalid choice. Please try again.");
+                    default -> logger.info("Invalid choice. Please try again.");
                 }
             } catch (Exception e) {
-                System.out.println("An error occurred: " + e.getMessage());
+                logger.info("An error occurred: " + e.getMessage());
             }
         }
     }
@@ -81,17 +85,17 @@ public class TaskManagerApp {
      * Displays the main menu of the application.
      */
     private static void showMenu() {
-        System.out.println("\n===== Task Manager Menu =====");
-        System.out.println("1. Add New Location");
-        System.out.println("2. Add New Shift");
-        System.out.println("3. Add New Assignment");
-        System.out.println("4. View Tomorrow's Assignment");
-        System.out.println("5. View Assignments by Date Range");
-        System.out.println("6. Update Assignment");
-        System.out.println("7. View All Locations");
-        System.out.println("8. View Recurring Shifts");
-        System.out.println("9. Check if Date is Rest Day");
-        System.out.println("0. Exit");
+        logger.info("\n===== Task Manager Menu =====");
+        logger.info("1. Add New Location");
+        logger.info("2. Add New Shift");
+        logger.info("3. Add New Assignment");
+        logger.info("4. View Tomorrow's Assignment");
+        logger.info("5. View Assignments by Date Range");
+        logger.info("6. Update Assignment");
+        logger.info("7. View All Locations");
+        logger.info("8. View Recurring Shifts");
+        logger.info("9. Check if Date is Rest Day");
+        logger.info("0. Exit");
         System.out.print("Enter your choice: ");
     }
 
@@ -108,11 +112,11 @@ public class TaskManagerApp {
 
         try {
             Location newLocation = service.addLocation(name, type, address);
-            System.out.println("Location added successfully with ID: " + newLocation.getId());
+            logger.info("Location added successfully with ID: " + newLocation.getId());
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+            logger.error("SQL Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error adding location: " + e.getMessage());
+            logger.error("Error adding location: " + e.getMessage());
         }
     }
 
@@ -138,11 +142,11 @@ public class TaskManagerApp {
 
         try {
             Shift newShift = service.addShift(locationId, startTime, endTime, isArmed, isRecurring, recurrencePattern);
-            System.out.println("Shift added successfully with ID: " + newShift.getId());
+            logger.info("Shift added successfully with ID: " + newShift.getId());
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+            logger.error("SQL Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error adding shift: " + e.getMessage());
+            logger.error("Error adding shift: " + e.getMessage());
         }
     }
 
@@ -161,11 +165,11 @@ public class TaskManagerApp {
 
         try {
             Assignment newAssignment = service.addAssignment(shiftId, assignmentDate, isReten, notes);
-            System.out.println("Assignment added successfully with ID: " + newAssignment.getId());
+            logger.info("Assignment added successfully with ID: " + newAssignment.getId());
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+            logger.error("SQL Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error adding assignment: " + e.getMessage());
+            logger.error("Error adding assignment: " + e.getMessage());
         }
     }
 
@@ -177,7 +181,7 @@ public class TaskManagerApp {
         try {
             tomorrow = getDynamicDate().plusDays(1);
         } catch (Exception e) {
-            System.err.println("Error getting dynamic date: " + e.getMessage());
+            logger.error("Error getting dynamic date: " + e.getMessage());
             return;
         }
         try {
@@ -185,12 +189,12 @@ public class TaskManagerApp {
             if (tomorrowAssignment != null) {
                 printAssignmentDetails(tomorrowAssignment);
             } else {
-                System.out.println("No assignment found for tomorrow.");
+                logger.info("No assignment found for tomorrow.");
             }
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+            logger.error("SQL Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error getting assignment for date: " + e.getMessage());
+            logger.error("Error getting assignment for date: " + e.getMessage());
         }
     }
 
@@ -200,11 +204,11 @@ public class TaskManagerApp {
      * @param assignment the assignment to print details for.
      */
     private static void printAssignmentDetails(Assignment assignment) {
-        System.out.println("Tomorrow's Assignment:");
-        System.out.println("Date: " + assignment.getAssignmentDate());
-        System.out.println("Retén: " + (assignment.isReten() ? "Yes" : "No"));
-        System.out.println("Status: " + assignment.getStatus());
-        System.out.println("Notes: " + assignment.getNotes());
+        logger.info("Tomorrow's Assignment:");
+        logger.info("Date: " + assignment.getAssignmentDate());
+        logger.info("Retén: " + (assignment.isReten() ? "Yes" : "No"));
+        logger.info("Status: " + assignment.getStatus());
+        logger.info("Notes: " + assignment.getNotes());
     }
 
     /**
@@ -242,20 +246,20 @@ public class TaskManagerApp {
             List<Assignment> assignments = service.getAssignmentsForDateRange(startDate, endDate);
 
             if (!assignments.isEmpty()) {
-                System.out.println("\nAssignments from " + startDate + " to " + endDate + ":");
+                logger.info("\nAssignments from " + startDate + " to " + endDate + ":");
                 for (Assignment assignment : assignments) {
-                    System.out.println("\nDate: " + assignment.getAssignmentDate());
-                    System.out.println("Retén: " + (assignment.isReten() ? "Yes" : "No"));
-                    System.out.println("Status: " + assignment.getStatus());
-                    System.out.println("Notes: " + assignment.getNotes());
+                    logger.info("\nDate: " + assignment.getAssignmentDate());
+                    logger.info("Retén: " + (assignment.isReten() ? "Yes" : "No"));
+                    logger.info("Status: " + assignment.getStatus());
+                    logger.info("Notes: " + assignment.getNotes());
                 }
             } else {
-                System.out.println("No assignments found for the specified date range.");
+                logger.info("No assignments found for the specified date range.");
             }
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+            logger.error("SQL Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error getting assignments for date range: " + e.getMessage());
+            logger.error("Error getting assignments for date range: " + e.getMessage());
         }
     }
 
@@ -277,11 +281,11 @@ public class TaskManagerApp {
             String notes = scanner.nextLine();
 
             service.updateAssignmentDetails(assignmentId, isReten, status, notes);
-            System.out.println("Assignment updated successfully.");
+            logger.info("Assignment updated successfully.");
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+            logger.error("SQL Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error updating assignment: " + e.getMessage());
+            logger.error("Error updating assignment: " + e.getMessage());
         }
     }
 
@@ -293,20 +297,20 @@ public class TaskManagerApp {
             List<Location> locations = service.getAllLocations();
 
             if (!locations.isEmpty()) {
-                System.out.println("\nAll Locations:");
+                logger.info("\nAll Locations:");
                 for (Location location : locations) {
-                    System.out.println("\nID: " + location.getId());
-                    System.out.println("Name: " + location.getName());
-                    System.out.println("Type: " + location.getType());
-                    System.out.println("Address: " + location.getAddress());
+                    logger.info("\nID: " + location.getId());
+                    logger.info("Name: " + location.getName());
+                    logger.info("Type: " + location.getType());
+                    logger.info("Address: " + location.getAddress());
                 }
             } else {
-                System.out.println("No locations found.");
+                logger.info("No locations found.");
             }
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+            logger.error("SQL Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error getting all locations: " + e.getMessage());
+            logger.error("Error getting all locations: " + e.getMessage());
         }
     }
 
@@ -318,22 +322,22 @@ public class TaskManagerApp {
             List<Shift> shifts = service.getRecurringShifts();
 
             if (!shifts.isEmpty()) {
-                System.out.println("\nRecurring Shifts:");
+                logger.info("\nRecurring Shifts:");
                 for (Shift shift : shifts) {
-                    System.out.println("\nID: " + shift.getId());
-                    System.out.println("Location ID: " + shift.getLocationId());
-                    System.out.println("Start Time: " + shift.getStartTime());
-                    System.out.println("End Time: " + shift.getEndTime());
-                    System.out.println("Armed: " + (shift.isArmed() ? "Yes" : "No"));
-                    System.out.println("Recurrence Pattern: " + shift.getRecurrencePattern());
+                    logger.info("\nID: " + shift.getId());
+                    logger.info("Location ID: " + shift.getLocationId());
+                    logger.info("Start Time: " + shift.getStartTime());
+                    logger.info("End Time: " + shift.getEndTime());
+                    logger.info("Armed: " + (shift.isArmed() ? "Yes" : "No"));
+                    logger.info("Recurrence Pattern: " + shift.getRecurrencePattern());
                 }
             } else {
-                System.out.println("No recurring shifts found.");
+                logger.info("No recurring shifts found.");
             }
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+            logger.error("SQL Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error getting recurring shifts: " + e.getMessage());
+            logger.error("Error getting recurring shifts: " + e.getMessage());
         }
     }
 
@@ -347,14 +351,14 @@ public class TaskManagerApp {
 
             boolean isRestDay = service.isRestDay(date);
             if (isRestDay) {
-                System.out.println(date + " is a rest day.");
+                logger.info(date + " is a rest day.");
             } else {
-                System.out.println(date + " is a work day.");
+                logger.info(date + " is a work day.");
             }
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+            logger.error("SQL Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error checking if date is rest day: " + e.getMessage());
+            logger.error("Error checking if date is rest day: " + e.getMessage());
         }
     }
 
@@ -372,7 +376,7 @@ public class TaskManagerApp {
                     throw new IllegalArgumentException("Usage: add-location <name> <type> <address>");
                 }
                 Location location = service.addLocation(args[1], args[2], args[3]);
-                System.out.println("Location added successfully with ID: " + location.getId());
+                logger.info("Location added successfully with ID: " + location.getId());
             }
             case "add-shift" -> {
                 if (args.length != 7) {
@@ -384,7 +388,7 @@ public class TaskManagerApp {
                 boolean isArmed = Boolean.parseBoolean(args[4]);
                 boolean isRecurring = Boolean.parseBoolean(args[5]);
                 Shift shift = service.addShift(locationId, startTime, endTime, isArmed, isRecurring, args[6]);
-                System.out.println("Shift added successfully with ID: " + shift.getId());
+                logger.info("Shift added successfully with ID: " + shift.getId());
             }
             case "add-assignment" -> {
                 if (args.length != 5) {
@@ -395,11 +399,11 @@ public class TaskManagerApp {
                 boolean isReten = Boolean.parseBoolean(args[3]);
                 try {
                     Assignment assignment = service.addAssignment(shiftId, date, isReten, args[4]);
-                    System.out.println("Assignment added successfully with ID: " + assignment.getId());
+                    logger.info("Assignment added successfully with ID: " + assignment.getId());
                 } catch (SQLException e) {
-                    System.err.println("SQL Error: " + e.getMessage());
+                    logger.error("SQL Error: " + e.getMessage());
                 } catch (Exception e) {
-                    System.err.println("Error adding assignment: " + e.getMessage());
+                    logger.error("Error adding assignment: " + e.getMessage());
                 }
             }
             case "view-tomorrow" -> {
@@ -408,26 +412,26 @@ public class TaskManagerApp {
                     if (assignment != null) {
                         printAssignmentDetails(assignment);
                     } else {
-                        System.out.println("No assignment found for tomorrow.");
+                        logger.info("No assignment found for tomorrow.");
                     }
                 } catch (SQLException e) {
-                    System.err.println("SQL Error: " + e.getMessage());
+                    logger.error("SQL Error: " + e.getMessage());
                 } catch (Exception e) {
-                    System.err.println("Error getting assignment for date: " + e.getMessage());
+                    logger.error("Error getting assignment for date: " + e.getMessage());
                 }
             }
             case "view-locations" -> {
                 List<Location> locations = service.getAllLocations();
                 if (!locations.isEmpty()) {
-                    System.out.println("All Locations:");
+                    logger.info("All Locations:");
                     for (Location location : locations) {
-                        System.out.println("\nID: " + location.getId());
-                        System.out.println("Name: " + location.getName());
-                        System.out.println("Type: " + location.getType());
-                        System.out.println("Address: " + location.getAddress());
+                        logger.info("\nID: " + location.getId());
+                        logger.info("Name: " + location.getName());
+                        logger.info("Type: " + location.getType());
+                        logger.info("Address: " + location.getAddress());
                     }
                 } else {
-                    System.out.println("No locations found.");
+                    logger.info("No locations found.");
                 }
             }
             default -> throw new IllegalArgumentException("Unknown command: " + command);

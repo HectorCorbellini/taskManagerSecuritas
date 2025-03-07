@@ -36,3 +36,7 @@ replay_pid*
 
 # Application properties
 src/main/resources/application.properties
+
+# Log files
+logs/
+*.log
